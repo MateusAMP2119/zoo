@@ -24,8 +24,8 @@ From a checkout with Rust installed, `./install.sh` (or `.\install.ps1`) builds 
 ## Use
 
 ```sh
-zoo            # Claude Code
-zoo <agent>    # Claude Code as the named agent (claude --agent <agent>)
+zoo            # claude code
+zoo <agent>    # claude code as the named agent (claude --agent <agent>)
 ```
 
 ## Uninstall

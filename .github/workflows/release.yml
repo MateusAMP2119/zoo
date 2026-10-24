@@ -1,5 +1,4 @@
-# Builds zoo for every platform the installers support and attaches the archives
-# to a GitHub release. Runs on a pushed tag such as v0.1.0.
+# on a pushed tag such as v0.1.0, builds zoo for every installer platform and attaches it to a github release.
 name: release
 
 on:
@@ -22,7 +21,7 @@ jobs:
           - { target: aarch64-pc-windows-msvc, os: windows-latest }
     runs-on: ${{ matrix.os }}
     env:
-      # zoo is pure Rust, so the static musl builds link with the bundled rust-lld.
+      # zoo is pure rust, so the static musl builds link with the bundled rust-lld.
       CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: rust-lld
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: rust-lld
     steps:

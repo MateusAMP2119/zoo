@@ -1,8 +1,4 @@
-# Installs zoo, so typing `zoo` launches Claude Code. Windows.
-#
-#   irm https://raw.githubusercontent.com/MateusAMP2119/zoo/main/install.ps1 | iex
-#
-# From a checkout with cargo available, it builds zoo from source instead of downloading it.
+# installs zoo on windows, building from source when run from a checkout with cargo.
 $ErrorActionPreference = 'Stop'
 
 $Repo = if ($env:ZOO_REPO) { $env:ZOO_REPO } else { 'MateusAMP2119/zoo' }
@@ -10,15 +6,15 @@ $BinDir = Join-Path $HOME '.local\bin'
 
 function Say($msg) { Write-Host "zoo: $msg" }
 
-# 1. Claude Code, through its official installer, which also uses ~\.local\bin.
+# 1. claude code, through its official installer, which also uses ~\.local\bin.
 if ((Get-Command claude -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $BinDir 'claude.exe'))) {
-    Say 'Claude Code already installed'
+    Say 'claude code already installed'
 } else {
-    Say 'installing Claude Code'
+    Say 'installing claude code'
     Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
 }
 
-# 2. The zoo binary, built from this checkout or downloaded from the latest release.
+# 2. the zoo binary, built from this checkout or downloaded from the latest release.
 New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
 $Target = Join-Path $BinDir 'zoo.exe'
 $SrcDir = if ($PSScriptRoot) { $PSScriptRoot } else { $null }
@@ -43,7 +39,7 @@ if ($SrcDir -and (Select-String -Quiet -Pattern '^name = "zoo"' -Path (Join-Path
 }
 Say "installed $Target"
 
-# 3. ~\.local\bin on the user PATH, for terminals opened from now on.
+# 3. ~\.local\bin on the user path, for terminals opened from now on.
 $UserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if (-not (($UserPath -split ';') -contains $BinDir)) {
     [Environment]::SetEnvironmentVariable('Path', (@($UserPath, $BinDir) | Where-Object { $_ }) -join ';', 'User')
