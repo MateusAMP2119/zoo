@@ -1,0 +1,45 @@
+# Runs the published one-line installers on fresh Windows, macOS and Linux
+# machines and checks that `zoo` starts Claude Code afterwards.
+name: install
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  unix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    env:
+      # Each OS's default shell: zsh on macOS, bash on Linux.
+      SHELL: ${{ startsWith(matrix.os, 'macos') && '/bin/zsh' || '/bin/bash' }}
+    steps:
+      - run: curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/install.sh | ZOO_REPO=${{ github.repository }} sh
+      # A new interactive shell picks up PATH the way a new terminal would; Claude Code
+      # refuses to start without a terminal, which proves zoo reached it.
+      - shell: bash
+        run: |
+          $SHELL -ic 'command -v zoo && command -v claude && zoo </dev/null' 2>&1 | tee out.txt || true
+          grep -q 'Input must be provided' out.txt
+
+  windows:
+    strategy:
+      matrix:
+        os: [windows-latest, windows-11-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - shell: pwsh
+        run: |
+          $env:ZOO_REPO = '${{ github.repository }}'
+          irm https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/install.ps1 | iex
+      - shell: pwsh
+        run: |
+          $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
+          (Get-Command zoo).Source
+          (Get-Command claude).Source
+          $out = (cmd /c 'zoo < NUL 2>&1') -join "`n"
+          $out
+          if ($out -notmatch 'Input must be provided') { exit 1 }

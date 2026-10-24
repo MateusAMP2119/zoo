@@ -61,7 +61,9 @@ case ":$PATH:" in
     *)
         case "$(basename "${SHELL:-sh}")" in
             zsh) rc="$HOME/.zshrc"; line='export PATH="$HOME/.local/bin:$PATH"' ;;
-            bash) rc="$HOME/.bashrc"; line='export PATH="$HOME/.local/bin:$PATH"' ;;
+            # macOS terminals start bash as a login shell, which reads .bash_profile.
+            bash) rc="$HOME/.bashrc"; [ "$(uname -s)" = Darwin ] && rc="$HOME/.bash_profile"
+                line='export PATH="$HOME/.local/bin:$PATH"' ;;
             fish) rc="$HOME/.config/fish/config.fish"; line='fish_add_path $HOME/.local/bin' ;;
             *) rc="$HOME/.profile"; line='export PATH="$HOME/.local/bin:$PATH"' ;;
         esac
